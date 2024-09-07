@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Verifica se o script está sendo executado como root
-if [[ $EUID -ne 0 ]]; then
-    echo "Este script deve ser executado como root." 
-    exit 1
-fi
-
 # Função para verificar a versão do Java
 check_java() {
     if type -p java; then
@@ -26,8 +20,9 @@ check_java() {
 # Função para instalar o Java 17.0.2
 install_java() {
     echo "Instalando Java 17.0.2..."
-    apt update
-    apt install -y openjdk-17-jdk
+    sudo apt update
+    sudo apt --fix-broken install -y
+    sudo apt install -y openjdk-17-jdk
 }
 
 # Função para verificar a versão do Node.js
@@ -50,8 +45,9 @@ check_node() {
 # Função para instalar o Node.js versão 18
 install_node() {
     echo "Instalando Node.js versão 18..."
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    apt install -y nodejs
+    sudo apt --fix-broken install -y
+    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+    sudo apt install -y nodejs
 }
 
 # Verificar Java e Node.js
