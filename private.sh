@@ -25,20 +25,63 @@ install_java() {
     sudo apt install -y openjdk-17-jdk
 }
 
+check_mysql() {
+    if ! command -v mysql &> /dev/null; then
+        echo "MySQL não está instalado. Instalando o MySQL..."
+        install_mysql
+    else
+        echo "MySQL já está instalado."
+    fi
+}
+
+install_mysql() {
+    echo "Instalando a última versão do MySQL..."
+    sudo apt install -y mysql-server
+    sudo systemctl start mysql
+    sudo systemctl enable mysql
+    echo "MySQL instalado e iniciado."
+}
+
+
+setup_database() {
+    DB_REPO_URL="https://github.com/Safe-Ride/database.git"
+    DB_REPO_DIR="database"
+
+    if [ ! -d "$DB_REPO_DIR" ]; then
+        echo "Clonando o repositório do banco de dados..."
+        git clone "$DB_REPO_URL"
+    else
+        echo "Repositório do banco de dados já existe. Atualizando com git pull..."
+        cd "$DB_REPO_DIR"
+        git pull
+        cd ..
+    fi
+
+    echo "Executando script SQL para configurar o banco de dados..."
+    # Ajuste este comando conforme necessário para executar seus scripts SQL
+    mysql -u root -p < "$DB_REPO_DIR/scriptSafeRide.sql"
+}
+
+check_git() {
+    if ! command -v git &> /dev/null; then
+        echo "Git não está instalado. Instalando o Git..."
+        sudo apt update
+        sudo apt install git -y
+    else
+        echo "Git já está instalado."
+    fi
+}
+
 check_java
+check_git
+check_mysql
+
+setup_database
 
 REPO_URL="https://github.com/Safe-Ride/api-backend.git"
 REPO_DIR="api-backend/out/artifacts/api_backend_jar/"
 JAR_FILE="api_backend_jar/api-backend.jar"
 
-
-if ! command -v git &> /dev/null; then
-    echo "Git não está instalado. Instalando o Git..."
-    sudo apt update
-    sudo apt install git -y
-else
-    echo "Git já está instalado."
-fi
 
 # Clona o repositório se ele não existir, ou faz git pull se já existir
 if [ ! -d "$REPO_DIR" ]; then
